@@ -22,7 +22,13 @@ indexWriter.close()
 
 IndexReader reader = DirectoryReader.open(ramDirectoryIndex)
 IndexSearcher indexSearcher = new IndexSearcher(reader)
-List matchingQueries = [new TermQuery(new Term('author', 'Javier Perrara')),
+BooleanQuery booleanQuery = new BooleanQuery.Builder()
+        .add(new TermQuery(new Term('title', 'Good Behavior')), BooleanClause.Occur.MUST)
+        .add(new TermQuery(new Term('author', 'Javier Perrara')), BooleanClause.Occur.MUST)
+        .add(new TermQuery(new Term('chapters', 'Chapter 7: The Rebellion of Ostia.')), BooleanClause.Occur.MUST)
+        .build()
+List matchingQueries = [booleanQuery,
+                        new TermQuery(new Term('author', 'Javier Perrara')),
                         new TermQuery(new Term('contents', 'printing')),
                         new TermQuery(new Term('chapters', 'Chapter 7: The Rebellion of Ostia.')),
                         new TermQuery(new Term('chapters', 'Chapter 7: Death to Smoochie.')),
@@ -31,7 +37,7 @@ List matchingQueries = [new TermQuery(new Term('author', 'Javier Perrara')),
         .findAll { (indexSearcher.search(it, 1, new Sort()).totalHits == 1) }
 
 println('Matching queries - ')
-matchingQueries.each { println("[${it.class.simpleName} - ${it}]") }
+matchingQueries.each { println("${it.class.simpleName}=[q=${it}]") }
 
 Document buildDocument() {
     /**
